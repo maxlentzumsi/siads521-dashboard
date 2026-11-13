@@ -1,4 +1,4 @@
-Contaminant,TotalMeasurements,AboveMRLMeasurements,AboveMRLPct
+Contaminant,TotalMeasurements,AtOrAboveMRLMeasurements,AtOrAboveMRLPct
 11Cl-PF3OUdS,64420,0,0.0
 4:2 FTS,64419,3,0.004657011130256601
 6:2 FTS,64405,240,0.372641875630774

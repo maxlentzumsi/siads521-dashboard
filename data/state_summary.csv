@@ -1,4 +1,4 @@
-State,Contaminant,TotalPWS,AboveMRLPWS,AboveRefPWS,AboveMRLPct,AboveRefPct
+State,Contaminant,TotalPWS,AtOrAboveMRLPWS,AboveRefPWS,AtOrAboveMRLPct,AboveRefPct
 AK,PFBA,30,2,0,6.666666666666667,0.0
 AK,PFHxA,30,4,0,13.333333333333334,0.0
 AK,lithium,30,1,0,3.3333333333333335,0.0
