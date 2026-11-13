@@ -27,6 +27,12 @@ fig = px.bar(
 
 fig.update_yaxes(range=[0, 100])
 
+fig.update_xaxes(
+    tickmode="linear",
+    dtick=1,
+    tickangle=-90
+)
+
 st.plotly_chart(fig, width="stretch")
 
 st.caption(
