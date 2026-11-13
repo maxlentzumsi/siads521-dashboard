@@ -2,6 +2,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+st.set_page_config(layout="wide")
+
 st.title("Water Contaminant Dashboard")
 
 df = pd.read_csv("data/state_summary.csv")
