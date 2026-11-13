@@ -6,9 +6,10 @@ st.title("Water Contaminant Dashboard")
 
 df = pd.read_csv("data/state_summary.csv")
 
-lithium = df[df["Contaminant"] == "lithium"].sort_values(
-    "AboveRefPct",
-    ascending=False
+lithium = (
+    df[df["Contaminant"] == "lithium"]
+    .sort_values("AboveRefPct", ascending=False)
+    .head(10)
 )
 
 fig = px.bar(
@@ -18,20 +19,14 @@ fig = px.bar(
     hover_data=["TotalPWS", "AboveRefPWS"],
     labels={
         "State": "State",
-        "AboveRefPct": "Tested systems above reference (%)",
-        "TotalPWS": "Systems tested",
+        "AboveRefPct": "Tested systems above reference lithium (%)",
+        "TotalPWS": "Systems",
         "AboveRefPWS": "Systems above reference"
     },
-    title="Lithium: systems with at least one above-reference result"
+    title="Top 10 States: percentage of systems with at least one above-reference lithium result"
 )
 
 fig.update_yaxes(range=[0, 100])
-
-fig.update_xaxes(
-    tickmode="linear",
-    dtick=1,
-    tickangle=-90
-)
 
 st.plotly_chart(fig, width="stretch")
 
