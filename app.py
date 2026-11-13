@@ -23,7 +23,7 @@ fig = px.bar(
         "TotalPWS": "Systems",
         "AboveRefPWS": "Systems above reference"
     },
-    title="Top 10 States: percentage of systems with at least one above-reference lithium result"
+    title="Top 10 states: percentage of systems with at least one above-reference lithium result"
 )
 
 fig.update_yaxes(range=[0, 100])
@@ -35,4 +35,38 @@ st.caption(
     "Percentages describe tested public water systems with at least one "
     "above-reference result, using EPA's Table 3 comparison method. "
     "The reference is a non-regulatory screening benchmark."
+)
+
+
+####################################################################################################################3
+
+
+lithium_mrl = (
+    df[df["Contaminant"] == "lithium"]
+    .sort_values("AtOrAboveMRLPct", ascending=False)
+    .head(10)
+)
+
+fig_mrl = px.bar(
+    lithium_mrl,
+    x="State",
+    y="AtOrAboveMRLPct",
+    hover_data=["TotalPWS", "AtOrAboveMRLPWS"],
+    labels={
+        "State": "State",
+        "AtOrAboveMRLPct": "Tested systems at or above lithium MRL (%)",
+        "TotalPWS": "Systems",
+        "AtOrAboveMRLPWS": "Systems with lithium results ≥ MRL"
+    },
+    title="TTop 10 states: percentage of systems with at least one above-MRL lithium result"
+)
+
+fig_mrl.update_yaxes(range=[0, 100])
+
+st.plotly_chart(fig_mrl, width="stretch")
+
+st.caption(
+    "Percentage of tested public water systems with at least one "
+    "lithium result ≥ the minimum reporting level of 9 µg/L. "
+    "The MRL is a reporting threshold, not a health benchmark."
 )
