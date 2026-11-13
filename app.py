@@ -70,3 +70,11 @@ fig = px.scatter(
 )
 
 fig.show()
+
+st.plotly_chart(fig, width="stretch")
+
+st.caption(
+    "UCMR 5 samples collected during 2023–2025. "
+    "Concentration of collection (µg/L) at time of collection date "
+    "MRL / Reference concentration are non-regulatory screening benchmarks."
+)
