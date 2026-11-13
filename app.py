@@ -58,7 +58,7 @@ fig_mrl = px.bar(
         "TotalPWS": "Systems",
         "AtOrAboveMRLPWS": "Systems with lithium results ≥ MRL"
     },
-    title="TTop 10 states: percentage of systems with at least one above-MRL lithium result"
+    title="Top 10 states: percentage of systems with at least one above-MRL lithium result"
 )
 
 fig_mrl.update_yaxes(range=[0, 100])
