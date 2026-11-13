@@ -43,3 +43,30 @@ st.caption(
 
 ####################################################################################################################3
 
+value_data = pd.read_csv("data/value_data.csv")
+
+selected_state = "CO"
+containment = "lithium"
+
+state_values = value_data[
+    (value_data["State"] == selected_state) &
+    (value_data["Contaminant"] == containment)
+].copy()
+
+fig = px.scatter(
+    state_values,
+    x="CollectionDate",
+    y="AnalyticalResultValue",
+    color="AboveRef",
+    color_discrete_map={False: "darkgray", True: "goldenrod"},
+    hover_data=["PWSID"],
+    title=f"Lithium measurements in {selected_state} at or above MRL",
+    labels={
+        "CollectionDate": "Collection date",
+        "AnalyticalResultValue": "Lithium concentration (µg/L)",
+        "AboveRef": "Above reference flag"
+    },
+    opacity=0.7
+)
+
+fig.show()
