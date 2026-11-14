@@ -125,18 +125,9 @@ with left:
         width=None,
         height=450,
         margin=dict(l=10, r=10, t=50, b=70),
-        plot_bgcolor="white"
-    )
-
-    fig.update_layout(
+        plot_bgcolor="#171717",
         paper_bgcolor="#171717",
         font_color="white"
-    )
-
-    fig.update_geos(
-        bgcolor="#171717",
-        landcolor="#333333",
-        lakecolor="#171717"
     )
 
     st.plotly_chart(fig, width="stretch")
