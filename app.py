@@ -121,3 +121,90 @@ st.caption(
     "MRL / Reference concentration are non-regulatory screening benchmarks."
 )
 
+
+###################################################################################################################################################################################3
+
+pws_summary = pd.read_csv("data/pws_summary.csv")
+
+state = "CO"
+contaminant = "lithium"
+
+systems = pws_summary[
+    (pws_summary["State"] == state) &
+    (pws_summary["Contaminant"] == contaminant)
+].copy()
+
+#set everything to below MRL to start
+systems["Category"] = "Below MRL only"
+
+#overwrite the ones at or above MRL
+systems.loc[
+    systems["AtOrAboveMRL"], "Category"
+] = "At or above MRL, none above reference"
+
+#overwrite the ones above ref
+systems.loc[
+    systems["AboveRef"].fillna(False), "Category"
+] = "Above reference"
+
+#system is one of the three categories
+categories = [
+    "Below MRL only",
+    "At or above MRL, none above reference",
+    "Above reference"
+]
+
+systems["Category"] = pd.Categorical(
+    systems["Category"],
+    categories=categories,
+    ordered=True
+)
+
+systems = systems.sort_values("Category").reset_index(drop=True)
+
+systems["x"] = systems.index % 15
+systems["y"] = systems.index // 15
+
+fig = px.scatter(
+    systems,
+    x="x",
+    y="y",
+    color="Category",
+    hover_name="PWSID",
+    color_discrete_map={
+        categories[0]: "lightgray", #below MRL
+        categories[1]: "#E8BE50", #MRL
+        categories[2]: "#8C6500"  #above ref
+    },
+    title="Colorado lithium findings — each square is one tested PWS"
+)
+
+fig.update_traces(
+    marker=dict(symbol="square", size=20),
+    hovertemplate="PWS: %{hovertext}<extra>%{fullData.name}</extra>"
+)
+
+fig.update_xaxes(visible=False, range=[-1, 15])
+fig.update_yaxes(
+    visible=False,
+    autorange="reversed",
+    scaleanchor="x",
+    scaleratio=1
+)
+
+fig.update_layout(
+    width=750,
+    height=500,
+    plot_bgcolor="white",
+    legend=dict(orientation="h", y=-0.1, title_text="")
+)
+
+fig.show()
+
+st.plotly_chart(fig, width="stretch")
+
+st.caption(
+    "UCMR 5 samples collected during 2023–2025. "
+    "Public Water Systems (PWS) categorized by having at least one measurement of the above labeled categories from 2023 - 2025 "
+    "MRL / Reference concentration are non-regulatory screening benchmarks."
+)
