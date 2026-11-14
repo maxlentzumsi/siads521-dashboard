@@ -96,7 +96,7 @@ with left:
             categories[1]: "#E8BE50", #MRL
             categories[2]: "#8C6500"  #above ref
         },
-        title="Colorado lithium findings — each square is one tested PWS"
+        title="Public Water Systems by measurement category"
     )
 
     fig.update_traces(
