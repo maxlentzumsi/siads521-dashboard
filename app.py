@@ -128,6 +128,17 @@ with left:
         plot_bgcolor="white"
     )
 
+    fig.update_layout(
+        paper_bgcolor="#171717",
+        font_color="white"
+    )
+
+    fig.update_geos(
+        bgcolor="#171717",
+        landcolor="#333333",
+        lakecolor="#171717"
+    )
+
     st.plotly_chart(fig, width="stretch")
     
     st.caption(
