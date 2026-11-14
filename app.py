@@ -100,10 +100,10 @@ with left:
     )
 
     fig.update_traces(
-        marker=dict(
-            symbol="square",
-            size=32,
-            line=dict(color="white", width=2)
+    marker=dict(
+        symbol="square",
+        size=32,
+        line=dict(color="white", width=1)
     ),
     hovertemplate="PWS: %{hovertext}<extra>%{fullData.name}</extra>"
     )
