@@ -100,26 +100,36 @@ with left:
     )
 
     fig.update_traces(
-        marker=dict(symbol="square", size=20),
-        hovertemplate="PWS: %{hovertext}<extra>%{fullData.name}</extra>"
+        marker=dict(
+            symbol="square",
+            size=28,
+            line=dict(color="white", width=2)
+    ),
+    hovertemplate="PWS: %{hovertext}<extra>%{fullData.name}</extra>"
     )
 
-    fig.update_xaxes(visible=False, range=[-1, 15])
+    fig.update_xaxes(
+        visible=False,
+        range=[-0.5, 14.5],
+        constrain="domain"
+    )
+
     fig.update_yaxes(
         visible=False,
-        autorange="reversed",
-        scaleanchor="x",
-        scaleratio=1
+        range=[systems["y"].max() + 0.5, -0.5],
+        scaleanchor=None
     )
 
     fig.update_layout(
-        width=750,
-        height=500,
-        plot_bgcolor="white",
-        legend=dict(orientation="h", y=-0.1, title_text="")
+        autosize=True,
+        width=None,
+        height=450,
+        margin=dict(l=10, r=10, t=50, b=70),
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(orientation="h", y=-0.08, title_text="")
     )
 
-    fig.show()
+    st.plotly_chart(fig, width="stretch")
 
     st.plotly_chart(fig, width="stretch")
 
