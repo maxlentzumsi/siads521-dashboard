@@ -130,9 +130,7 @@ with left:
     )
 
     st.plotly_chart(fig, width="stretch")
-
-    st.plotly_chart(fig, width="stretch")
-
+    
     st.caption(
         "UCMR 5 samples collected during 2023–2025. "
         "Public Water Systems (PWS) categorized by having at least one measurement of the above labeled categories from 2023 - 2025 "
