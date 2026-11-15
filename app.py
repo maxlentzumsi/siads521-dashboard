@@ -122,9 +122,11 @@ with left:
     st.plotly_chart(fig, width="stretch")
     
     st.caption(
-        "UCMR 5 samples collected during 2023–2025. "
-        "Public Water Systems (PWS) categorized by having at least one measurement of the above labeled categories from 2023 - 2025 "
-        "MRL / Reference concentration are non-regulatory screening benchmarks."
+        "Chart shows the breakdown counts of public water systems within a state into three categories. "
+        "Below MRL - the system had no measurements of the specified contaminant above minimul reporting level. "
+        "At or above MRL but not above reference concentration - one or more measurements between 2023-2025 at or above "
+        "minimum reporting level but not above the health-based reference. "
+        "Above ref - one or more measurements between 2023-2025 for the specified contaminant above the health-based reference concentration."
     )
 
 ####################################################################################################################3
