@@ -7,6 +7,8 @@ st.set_page_config(layout="wide")
 st.title("Water Contaminant Dashboard")
 
 contaminant_summary = pd.read_csv("data/contaminant_summary.csv")
+state_summary = pd.read_csv("data/state_summary.csv")
+
 
 plot_data = (
     contaminant_summary
@@ -44,91 +46,78 @@ st.caption(
 left, right = st.columns(2)
 
 with left:
-    pws_summary = pd.read_csv("data/pws_summary.csv")
-
     state = "CO"
     contaminant = "lithium"
 
-    systems = pws_summary[
-        (pws_summary["State"] == state) &
-        (pws_summary["Contaminant"] == contaminant)
-    ].copy()
+    row = state_summary[
+        (state_summary["State"] == state) &
+        (state_summary["Contaminant"] == contaminant)
+    ].iloc[0]
 
-    #set everything to below MRL to start
-    systems["Category"] = "Below MRL only"
+    total = int(row["TotalPWS"])
+    at_or_above = int(row["AtOrAboveMRLPWS"])
+    below = total - at_or_above
 
-    #overwrite the ones at or above MRL
-    systems.loc[
-        systems["AtOrAboveMRL"], "Category"
-    ] = "At or above MRL, none above reference"
-
-    #overwrite the ones above ref
-    systems.loc[
-        systems["AboveRef"].fillna(False), "Category"
-    ] = "Above reference"
-
-    #system is one of the three categories
-    categories = [
-        "Below MRL only",
-        "At or above MRL, none above reference",
-        "Above reference"
+    labels = [
+        f"All tested systems: {total:,}",
+        f"Below MRL only: {below:,} ({below / total:.1%})",
+        f"At or above MRL: {at_or_above:,} ({at_or_above / total:.1%})"
     ]
 
-    systems["Category"] = pd.Categorical(
-        systems["Category"],
-        categories=categories,
-        ordered=True
-    )
+    source = [0, 0]
+    target = [1, 2]
+    values = [below, at_or_above]
+    colors = ["gray", "lightgray", "goldenrod"]
 
-    systems = systems.sort_values("Category").reset_index(drop=True)
+    # Add the reference breakdown when a cutoff is available
+    if pd.notna(row["AboveRefPWS"]):
+        above_ref = int(row["AboveRefPWS"])
+        mrl_only = at_or_above - above_ref
 
-    systems["x"] = systems.index % 15
-    systems["y"] = systems.index // 15
+        labels += [
+            f"None above reference: {mrl_only:,} ({mrl_only / total:.1%})",
+            f"Above reference: {above_ref:,} ({above_ref / total:.1%})"
+        ]
 
-    fig = px.scatter(
-        systems,
-        x="x",
-        y="y",
-        color="Category",
-        hover_name="PWSID",
-        color_discrete_map={
-            categories[0]: "lightgray", #below MRL
-            categories[1]: "#E8BE50", #MRL
-            categories[2]: "#8C6500"  #above ref
-        },
-        title="Public Water Systems by measurement category"
-    )
+        source += [2, 2]
+        target += [3, 4]
+        values += [mrl_only, above_ref]
+        colors += ["#E8BE50", "#8C6500"]
 
-    fig.update_traces(
-    marker=dict(
-        symbol="square",
-        size=23,
-        line=dict(width=0)
-    )
-    )
-
-    fig.update_xaxes(
-        visible=False,
-        range=[-0.5, 14.5],
-        constrain="domain"
-    )
-
-    fig.update_yaxes(
-        visible=False,
-        range=[systems["y"].max() + 0.5, -0.5],
-        scaleanchor="x",
-        scaleratio=1,
-        constrain="domain"
-    )
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            label=[
+                f"Tested systems: {total}",
+                f"Below MRL only: {below}",
+                f"At or above MRL, none above reference: {mrl_only}",
+                f"Above reference: {above_ref}"
+            ],
+            color=["gray", "lightgray", "#E8BE50", "#8C6500"],
+            pad=30,
+            thickness=20
+        ),
+        link=dict(
+            source=[0, 0, 0],
+            target=[1, 2, 3],
+            value=[below, mrl_only, above_ref],
+            color=[
+                "rgba(180,180,180,0.4)",
+                "rgba(232,190,80,0.4)",
+                "rgba(140,101,0,0.5)"
+            ]
+        )
+    ))
 
     fig.update_layout(
-        width=None,
-        height=450,
-        margin=dict(l=10, r=10, t=50, b=70),
-        plot_bgcolor="#171717",
+        title=f"{state}: {contaminant} — tested water systems",
+        height=400,
+        width=700,
+        margin=dict(l=20, r=20, t=60, b=20),
         paper_bgcolor="#171717",
         font_color="white"
     )
+
+    fig.show()
 
     st.plotly_chart(fig, width="stretch")
     
@@ -179,7 +168,6 @@ with right:
 
 ###################################################################################################################################################################
 
-state_summary = pd.read_csv("data/state_summary.csv")
 
 containment = "lithium"
 
