@@ -45,141 +45,208 @@ st.caption(
 )
 
 ########################################################################################################################
+
+# Shared filters for the Sankey and scatter
+st.subheader("Explore a state and contaminant")
+
+filter_left, filter_right = st.columns(2)
+
+states = sorted(state_summary["State"].dropna().unique().tolist())
+
+with filter_left:
+    selected_state = st.selectbox(
+        "State",
+        states,
+        index=states.index("CO"),
+        key="detail_state"
+    )
+
+# Offer contaminants available in the selected state
+contaminants = sorted(
+    state_summary.loc[
+        state_summary["State"] == selected_state,
+        "Contaminant"
+    ].unique().tolist()
+)
+
+with filter_right:
+    selected_contaminant = st.selectbox(
+        "Contaminant",
+        contaminants,
+        index=(
+            contaminants.index("lithium")
+            if "lithium" in contaminants else 0
+        ),
+        key="detail_contaminant"
+    )
+
 left, right = st.columns(2)
 
+# Sankey
 with left:
-    state = "CO"
-    contaminant = "lithium"
-
     row = state_summary[
-        (state_summary["State"] == state) &
-        (state_summary["Contaminant"] == contaminant)
+        (state_summary["State"] == selected_state) &
+        (state_summary["Contaminant"] == selected_contaminant)
     ].iloc[0]
 
     total = int(row["TotalPWS"])
     at_or_above = int(row["AtOrAboveMRLPWS"])
     below = total - at_or_above
 
-    labels = [
-        f"All tested systems: {total:,}",
-        f"Below MRL only: {below:,} ({below / total:.1%})",
-        f"At or above MRL: {at_or_above:,} ({at_or_above / total:.1%})"
-    ]
-
-    source = [0, 0]
-    target = [1, 2]
-    values = [below, at_or_above]
-    colors = ["gray", "lightgray", "goldenrod"]
-
-    # Add the reference breakdown when a cutoff is available
     if pd.notna(row["AboveRefPWS"]):
         above_ref = int(row["AboveRefPWS"])
         mrl_only = at_or_above - above_ref
 
-        labels += [
-            f"None above reference: {mrl_only:,} ({mrl_only / total:.1%})",
-            f"Above reference: {above_ref:,} ({above_ref / total:.1%})"
+        labels = [
+            f"Tested systems: {total:,}",
+            f"Below MRL only: {below:,}",
+            f"At or above MRL, none above reference: {mrl_only:,}",
+            f"Above reference: {above_ref:,}"
         ]
 
-        source += [2, 2]
-        target += [3, 4]
-        values += [mrl_only, above_ref]
-        colors += ["#E8BE50", "#8C6500"]
+        values = [below, mrl_only, above_ref]
+        node_colors = ["gray", "lightgray", "#E8BE50", "#8C6500"]
+        link_colors = [
+            "rgba(180,180,180,0.4)",
+            "rgba(232,190,80,0.4)",
+            "rgba(140,101,0,0.5)"
+        ]
+
+    else:
+        labels = [
+            f"Tested systems: {total:,}",
+            f"Below MRL only: {below:,}",
+            f"At or above MRL: {at_or_above:,}"
+        ]
+
+        values = [below, at_or_above]
+        node_colors = ["gray", "lightgray", "goldenrod"]
+        link_colors = [
+            "rgba(180,180,180,0.4)",
+            "rgba(218,165,32,0.4)"
+        ]
 
     fig = go.Figure(go.Sankey(
         node=dict(
-            label=[
-                f"Tested systems: {total}",
-                f"Below MRL only: {below}",
-                f"At or above MRL, none above reference: {mrl_only}",
-                f"Above reference: {above_ref}"
-            ],
-            color=["gray", "lightgray", "#E8BE50", "#8C6500"],
+            label=labels,
+            color=node_colors,
             pad=30,
             thickness=20
         ),
         link=dict(
-            source=[0, 0, 0],
-            target=[1, 2, 3],
-            value=[below, mrl_only, above_ref],
-            color=[
-                "rgba(180,180,180,0.4)",
-                "rgba(232,190,80,0.4)",
-                "rgba(140,101,0,0.5)"
-            ]
+            source=[0] * len(values),
+            target=list(range(1, len(values) + 1)),
+            value=values,
+            color=link_colors
         )
     ))
 
     fig.update_layout(
-        title=f"{state}: {contaminant} — tested water systems",
+        title=f"{selected_state}: {selected_contaminant} — tested systems",
         height=400,
-        width=700,
         margin=dict(l=20, r=20, t=60, b=20),
         paper_bgcolor="#171717",
         font_color="white"
     )
 
-    fig.show()
-
     st.plotly_chart(fig, width="stretch")
-    
+
     st.caption(
-        "Chart shows the breakdown counts of public water systems within a state into three categories. "
-        "Below MRL - the system had no measurements of the specified contaminant above minimul reporting level. "
-        "At or above MRL but not above reference concentration - one or more measurements between 2023-2025 at or above "
-        "minimum reporting level but not above the health-based reference. "
-        "Above ref - one or more measurements between 2023-2025 for the specified contaminant above the health-based reference concentration."
+        "Each system is counted once, based on its highest threshold "
+        "category reached during 2023–2025. Reference categories are "
+        "shown only when a reference cutoff is available."
     )
 
-####################################################################################################################3
+# Scatter — uses the same two selections
 with right:
-
-    selected_state = "CO"
-    containment = "lithium"
-
     state_values = value_data[
         (value_data["State"] == selected_state) &
-        (value_data["Contaminant"] == containment)
+        (value_data["Contaminant"] == selected_contaminant)
     ].copy()
 
-    fig = px.scatter(
-        state_values,
-        x="CollectionDate",
-        y="AnalyticalResultValue",
-        color="AboveRef",
-        color_discrete_map={False: "darkgray", True: "goldenrod"},
-        hover_data=["PWSID"],
-        title=f"Lithium measurements in {selected_state} at or above MRL",
-        labels={
-            "CollectionDate": "Collection date",
-            "AnalyticalResultValue": "Lithium concentration (µg/L)",
-            "AboveRef": "Above reference flag"
-        },
-        opacity=0.7
-    )
+    if state_values.empty:
+        st.info(
+            "No measurements at or above MRL are available "
+            "for this selection."
+        )
 
-    fig.show()
+    else:
+        state_values["CollectionDate"] = pd.to_datetime(
+            state_values["CollectionDate"]
+        )
 
-    st.plotly_chart(fig, width="stretch")
+        # Use readable categories, including missing reference information
+        state_values["Reference status"] = "Reference unavailable"
+
+        state_values.loc[
+            state_values["AboveRef"].eq(False),
+            "Reference status"
+        ] = "Not above reference cutoff"
+
+        state_values.loc[
+            state_values["AboveRef"].eq(True),
+            "Reference status"
+        ] = "Above reference cutoff"
+
+        fig = px.scatter(
+            state_values,
+            x="CollectionDate",
+            y="AnalyticalResultValue",
+            color="Reference status",
+            color_discrete_map={
+                "Not above reference cutoff": "darkgray",
+                "Above reference cutoff": "goldenrod",
+                "Reference unavailable": "darkgray"
+            },
+            hover_data=["PWSID"],
+            title=(
+                f"{selected_contaminant} measurements in "
+                f"{selected_state} at or above MRL"
+            ),
+            labels={
+                "CollectionDate": "Collection date",
+                "AnalyticalResultValue": "Concentration (µg/L)"
+            },
+            opacity=0.7,
+            height=400
+        )
+
+        st.plotly_chart(fig, width="stretch")
 
     st.caption(
-        "UCMR 5 samples collected during 2023–2025. "
-        "Concentration of collection (µg/L) at time of collection date "
-        "MRL / Reference concentration are non-regulatory screening benchmarks."
+        "Each dot represents a measurement at or above MRL, "
+        "collected during 2023–2025. MRL is a reporting threshold; "
+        "reference concentrations are non-regulatory health screening "
+        "benchmarks."
     )
 
+# Independent filter for the map
+st.subheader("Compare states")
 
-###################################################################################################################################################################
+# This map needs a reference cutoff, so offer only applicable contaminants
+map_contaminants = sorted(
+    state_summary.loc[
+        state_summary["AboveRefPct"].notna(),
+        "Contaminant"
+    ].unique().tolist()
+)
 
+map_contaminant = st.selectbox(
+    "Map contaminant",
+    map_contaminants,
+    index=(
+        map_contaminants.index("lithium")
+        if "lithium" in map_contaminants else 0
+    ),
+    key="map_contaminant"
+)
 
-containment = "lithium"
-
-lithium_states = state_summary[
-    state_summary["Contaminant"] == containment
+map_data = state_summary[
+    state_summary["Contaminant"] == map_contaminant
 ]
 
 fig = px.choropleth(
-    lithium_states,
+    map_data,
     locations="State",
     locationmode="USA-states",
     scope="usa",
@@ -189,14 +256,12 @@ fig = px.choropleth(
     hover_data=["TotalPWS", "AboveRefPWS"],
     labels={
         "AboveRefPct": "Above reference (%)",
-        "TotalPWS": "Total Systems",
+        "TotalPWS": "Systems tested",
         "AboveRefPWS": "Systems above reference"
     },
-    title="Lithium: tested water systems above reference cutoff, 2023-2025",
+    title=f"{map_contaminant}: tested systems above reference cutoff",
     height=550
 )
-
-fig.show()
 
 fig.update_layout(
     paper_bgcolor="#171717",
@@ -212,12 +277,9 @@ fig.update_geos(
 st.plotly_chart(fig, width="stretch")
 
 st.caption(
-    "UCMR 5 samples collected during 2023–2025. "
-    "Map of US states by percentage of PWS (Public Water System) having > 0 measurements above reference concentration "
-    "MRL / Reference concentration are non-regulatory screening benchmarks."
+    "Percentage of tested systems with at least one measurement above "
+    "the reference comparison cutoff during 2023–2025. "
+    "Only contaminants with an assigned reference cutoff are offered."
 )
-
-
-###################################################################################################################################################################################3
 
 
