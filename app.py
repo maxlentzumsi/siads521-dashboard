@@ -9,6 +9,7 @@ st.title("Water Contaminant Dashboard")
 
 contaminant_summary = pd.read_csv("data/contaminant_summary.csv")
 state_summary = pd.read_csv("data/state_summary.csv")
+value_data = pd.read_csv("data/value_data.csv")
 
 
 plot_data = (
@@ -132,7 +133,6 @@ with left:
 
 ####################################################################################################################3
 with right:
-    value_data = pd.read_csv("data/value_data.csv")
 
     selected_state = "CO"
     containment = "lithium"
