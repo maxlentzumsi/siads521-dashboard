@@ -39,9 +39,9 @@ fig.show()
 st.plotly_chart(fig, width="stretch")
 
 st.caption(
-    "UCMR 5 samples collected during 2023–2025. "
-    "Percentages describe precentage of measurements at or above miminum reportable level (MRL) "
+    "Percentages describe precentage of public water systems which having a measurement at or above miminum reportable level (MRL) "
     "MRL is a non-regulatory screening benchmark."
+    "Samples were collected from 2023-2025."
 )
 
 ########################################################################################################################
@@ -215,8 +215,8 @@ with right:
 
     st.caption(
         "Each dot represents a measurement at or above MRL, "
-        "collected during 2023–2025. MRL is a reporting threshold; "
-        "reference concentrations are non-regulatory health screening "
+        "collected during 2023–2025. MRL is a reporting threshold. "
+        "Reference concentrations are non-regulatory health-based screening "
         "benchmarks."
     )
 
